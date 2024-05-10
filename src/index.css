@@ -4,11 +4,17 @@
 body,
 #root {
   margin: 0;
+  background-color: #2E4C6B;
 }
 
 .wrapper {
   position: relative;
 }
+
+canvas {
+  border-radius: 20px;
+}
+
 .map__container {
   width: 100%;
   height: 100vh;
@@ -22,4 +28,39 @@ body,
   right: 10px;
   font-weight: bold;
   text-align: center;
+}
+
+.mapbox-gl-draw_line {
+  height: 40px;
+  width: 100px;
+  border: none;
+  background-color: #f89428;
+  border-radius: 5px;
+}
+
+.mapbox-gl-draw_line::before {
+  content: url("../public/img/stationery.png");
+}
+
+.mapbox-gl-draw_trash {
+  height: 40px;
+  width: 100px;
+  border: none;
+  background-color: rgb(223, 0, 0);
+  border-radius: 5px;
+}
+
+.mapbox-gl-draw_trash::before {
+  content: url("../public/img/recycle-bin.png");
+}
+
+.mapboxgl-ctrl-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 3px 0;
+}
+
+.mapboxgl-ctrl-attrib {
+  display: none;
 }
