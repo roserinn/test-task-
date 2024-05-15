@@ -30,23 +30,12 @@ canvas {
   text-align: center;
 }
 
-.mapbox-gl-draw_line {
-  height: 40px;
-  width: 100px;
-  border: none;
-  background-color: #f89428;
-  border-radius: 5px;
-}
-
-.mapbox-gl-draw_line::before {
-  content: url("../public/img/stationery.png");
-}
 
 .mapbox-gl-draw_trash {
-  height: 40px;
-  width: 100px;
+  height: 37px;
+  width: 65px;
   border: none;
-  background-color: rgb(223, 0, 0);
+  background-color: transparent;
   border-radius: 5px;
 }
 
@@ -63,4 +52,10 @@ canvas {
 
 .mapboxgl-ctrl-attrib {
   display: none;
+}
+
+.custom-controls {
+  position: absolute;
+bottom: 8px;
+left: 43.7%;;
 }

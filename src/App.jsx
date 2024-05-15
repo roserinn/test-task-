@@ -1,14 +1,18 @@
-import {useRef, useEffect} from 'react';
+import {useRef, useEffect, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from "@turf/turf";
+import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
+import CustomControl from './CustomControl.jsx'
 
 mapboxgl.accessToken = "pk.eyJ1Ijoicm9zZXJpbm4iLCJhIjoiY2x2bTY4NGNjMDJkazJsczA2Y2M2b3Z6ZCJ9.Ak0kz3VhRg_IbLAC-qgGUg";
 
 const Map = () => {
+
+  const [isChecked, setIsChecked] = useState(false);
   const mapContainerRef = useRef(null);
   const drawRef = useRef(null);
-
+  
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -17,12 +21,15 @@ const Map = () => {
       zoom: 6
     });
 
+    const modes = MapboxDraw.modes;
+    modes.static = StaticMode;
+
     const draw = new MapboxDraw({
       displayControlsDefault: false,
+      modes: modes,
       controls: {
-        line_string: true,
         trash: true
-      }
+      },
     });
 
     map.addControl(draw);
@@ -30,33 +37,57 @@ const Map = () => {
 
     map.on('draw.create', (e) => {
       const line = e.features[0];
-      const roundedLine = originLineCoordinates(line);
-      draw.add(roundedLine);
-    });
-
-    map.on('draw.selectionchange', (e) => {
-      const selectedLine = e.features;
-      if (selectedLine.length > 0) {
-        const line = selectedLine[0];
-        line.geometry.coordinates = line.properties.origCoords;
-        drawRef.current.add(line);
-      } else {
-        const allLines = draw.getAll();
-        const roundedLines = allLines.features.map(line => roundLineCoordinates(line));
-        draw.set({ type: 'FeatureCollection', features: roundedLines });
-      }
+      const coordinates = line.geometry.coordinates;
+      line.properties = { origCoords: coordinates };
+      draw.add(line);
     });
 
     map.on('draw.update', (e) => {
       const line = e.features[0];
-      const coordinatesLine = originLineCoordinates(line);
-      drawRef.current.add(coordinatesLine);
+      const coordinates = line.geometry.coordinates;
+      line.properties = { origCoords: coordinates };
+      draw.add(line);
     });
 
-    return () => map.remove();
+    return () => map.remove(); 
   }, []);
 
-  return <div ref={mapContainerRef} style={{ width: '1000px', height: '90vh', margin: '20px auto' }} />;
+  const handleCustomControlClick = () => {
+    const allLines = drawRef.current.getAll();
+    allLines.features = allLines.features.filter(item => item.geometry.coordinates.length !== 0);
+    
+    if (isChecked) {
+      drawRef.current.changeMode('static');
+    } else {
+      drawRef.current.changeMode('draw_line_string');
+    }
+    
+    if(allLines.features.length === 0) {
+      return;
+    }
+    if(drawRef.current.getMode() ==='static') {
+      const roundedLines = allLines.features.map(line => roundLineCoordinates(line))
+      drawRef.current.set({ type: 'FeatureCollection', features: roundedLines });
+    } else {
+      allLines.features.forEach(line => {
+        line.geometry.coordinates = line.properties.origCoords;
+        drawRef.current.add(line);
+      });
+    }
+  };
+
+  return (
+    <>  
+    <div ref={mapContainerRef} style={{ width: '1000px', height: '90vh', margin: '20px auto' }} />
+    <div className="custom-controls">
+        <CustomControl
+        isChecked={isChecked}
+        setIsChecked={setIsChecked}
+        onClick={handleCustomControlClick}
+        />
+      </div>
+    </>
+  )
 };
 
 const roundLineCoordinates = (line) => {
@@ -64,12 +95,6 @@ const roundLineCoordinates = (line) => {
   const rounded = turf.bezierSpline(roundedLine);
 
   line.geometry.coordinates = rounded.geometry.coordinates;
-  return line;
-};
-
-const originLineCoordinates = (line) => {
-  const coordinates = line.geometry.coordinates.map(coord => [coord[0], coord[1]]);
-  line.properties = { origCoords: coordinates };
   return line;
 };
 

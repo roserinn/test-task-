@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@mapbox/mapbox-gl-draw": "^1.4.3",
+    "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@turf/turf": "^6.5.0",
     "mapbox-gl": "^3.3.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.11"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
