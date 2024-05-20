@@ -56,6 +56,17 @@ canvas {
 
 .custom-controls {
   position: absolute;
+  color: white;
 bottom: 8px;
 left: 43.7%;;
 }
+
+.sharpness-slider {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  position: absolute;
+  left: 140px;
+  top: 0px;
+}
+

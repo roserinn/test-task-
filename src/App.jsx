@@ -1,18 +1,18 @@
-import {useRef, useEffect, useState} from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from "@turf/turf";
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
-import CustomControl from './CustomControl.jsx'
+import CustomControl from './CustomControl.jsx';
 
 mapboxgl.accessToken = "pk.eyJ1Ijoicm9zZXJpbm4iLCJhIjoiY2x2bTY4NGNjMDJkazJsczA2Y2M2b3Z6ZCJ9.Ak0kz3VhRg_IbLAC-qgGUg";
 
 const Map = () => {
-
   const [isChecked, setIsChecked] = useState(false);
+  const [sharpness, setSharpness] = useState(0.1);
   const mapContainerRef = useRef(null);
   const drawRef = useRef(null);
-  
+
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -49,24 +49,24 @@ const Map = () => {
       draw.add(line);
     });
 
-    return () => map.remove(); 
+    return () => map.remove();
   }, []);
 
   const handleCustomControlClick = () => {
     const allLines = drawRef.current.getAll();
     allLines.features = allLines.features.filter(item => item.geometry.coordinates.length !== 0);
-    
+
     if (isChecked) {
       drawRef.current.changeMode('static');
     } else {
       drawRef.current.changeMode('draw_line_string');
     }
-    
-    if(allLines.features.length === 0) {
+
+    if (allLines.features.length === 0) {
       return;
     }
-    if(drawRef.current.getMode() ==='static') {
-      const roundedLines = allLines.features.map(line => roundLineCoordinates(line))
+    if (drawRef.current.getMode() === 'static') {
+      const roundedLines = allLines.features.map(line => roundLineCoordinates(line, sharpness));
       drawRef.current.set({ type: 'FeatureCollection', features: roundedLines });
     } else {
       allLines.features.forEach(line => {
@@ -76,37 +76,51 @@ const Map = () => {
     }
   };
 
+  const handleSharpnessChange = (e) => {
+    const newSharpness = parseFloat(e.target.value);
+    setSharpness(newSharpness);
+    if (drawRef.current.getMode() !== 'static') return;
+
+    const allLines = drawRef.current.getAll();
+    allLines.features.forEach(line => {
+      line.geometry.coordinates = line.properties.origCoords;
+      drawRef.current.add(line);
+    });
+    const roundedLines = allLines.features.map(line => roundLineCoordinates(line, newSharpness));
+    drawRef.current.set({ type: 'FeatureCollection', features: roundedLines });
+  };
+
   return (
-    <>  
-    <div ref={mapContainerRef} style={{ width: '1000px', height: '90vh', margin: '20px auto' }} />
-    <div className="custom-controls">
+    <>
+      <div ref={mapContainerRef} style={{ width: '1000px', height: '90vh', margin: '20px auto' }} />
+      <div className="custom-controls">
         <CustomControl
-        isChecked={isChecked}
-        setIsChecked={setIsChecked}
-        onClick={handleCustomControlClick}
+          isChecked={isChecked}
+          setIsChecked={setIsChecked}
+          onClick={handleCustomControlClick}
         />
+        <div className='sharpness-slider'>
+          <input
+            type="range"
+            min="0.1"
+            max="0.85"
+            step="0.01"
+            value={sharpness}
+            onChange={handleSharpnessChange}
+          />
+          <label>Sharpness: {sharpness}</label>
+        </div>
+
       </div>
     </>
   )
 };
 
-const roundLineCoordinates = (line) => {
-  let sharpnessValue = 0;
-  const lines = line?.geometry?.coordinates;
-  for (let i = 0; i < lines.length - 1; i++) {
-    const startPoint = lines[i];
-    const endPoint = lines[i + 1];
-    const lineLength = turf.distance(turf.point(startPoint), turf.point(endPoint));
-    console.log(lineLength);
-    sharpnessValue = lineLength >= 200 ? 0.2 : 0.85;
-  };
-  console.log(sharpnessValue);
+const roundLineCoordinates = (line, sharpness) => {
   const roundedLine = turf.lineString(line.geometry.coordinates);
-  const rounded = turf.bezier(roundedLine, {sharpness: 0.2});
- console.log(rounded);
+  const rounded = turf.bezier(roundedLine, { sharpness: sharpness });
   line.geometry.coordinates = rounded.geometry.coordinates;
   return line;
 };
-
 
 export default Map;
