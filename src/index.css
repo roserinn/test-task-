@@ -70,3 +70,10 @@ left: 43.7%;;
   top: 0px;
 }
 
+.sharpness-slider input {
+  width:  300px;
+}
+
+.sharpness-slider label {
+  width: 70px;
+}

@@ -100,15 +100,16 @@ const Map = () => {
           onClick={handleCustomControlClick}
         />
         <div className='sharpness-slider'>
+        
+          <label>Sharpness: {sharpness}</label>
           <input
             type="range"
-            min="0.1"
-            max="0.85"
+            min="0.01"
+            max="1"
             step="0.01"
             value={sharpness}
             onChange={handleSharpnessChange}
           />
-          <label>Sharpness: {sharpness}</label>
         </div>
 
       </div>
