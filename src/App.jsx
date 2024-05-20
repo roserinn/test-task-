@@ -91,11 +91,22 @@ const Map = () => {
 };
 
 const roundLineCoordinates = (line) => {
+  let sharpnessValue = 0;
+  const lines = line?.geometry?.coordinates;
+  for (let i = 0; i < lines.length - 1; i++) {
+    const startPoint = lines[i];
+    const endPoint = lines[i + 1];
+    const lineLength = turf.distance(turf.point(startPoint), turf.point(endPoint));
+    console.log(lineLength);
+    sharpnessValue = lineLength >= 200 ? 0.2 : 0.85;
+  };
+  console.log(sharpnessValue);
   const roundedLine = turf.lineString(line.geometry.coordinates);
-  const rounded = turf.bezierSpline(roundedLine);
-
+  const rounded = turf.bezier(roundedLine, {sharpness: 0.2});
+ console.log(rounded);
   line.geometry.coordinates = rounded.geometry.coordinates;
   return line;
 };
+
 
 export default Map;
