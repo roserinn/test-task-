@@ -10,6 +10,7 @@ mapboxgl.accessToken = "pk.eyJ1Ijoicm9zZXJpbm4iLCJhIjoiY2x2bTY4NGNjMDJkazJsczA2Y
 const Map = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [sharpness, setSharpness] = useState(0.1);
+  const [resolution, setResolution] = useState(10000);
   const mapContainerRef = useRef(null);
   const drawRef = useRef(null);
 
@@ -66,7 +67,7 @@ const Map = () => {
       return;
     }
     if (drawRef.current.getMode() === 'static') {
-      const roundedLines = allLines.features.map(line => roundLineCoordinates(line, sharpness));
+      const roundedLines = allLines.features.map(line => roundLineCoordinates(line, sharpness, resolution));
       drawRef.current.set({ type: 'FeatureCollection', features: roundedLines });
     } else {
       allLines.features.forEach(line => {
@@ -86,29 +87,60 @@ const Map = () => {
       line.geometry.coordinates = line.properties.origCoords;
       drawRef.current.add(line);
     });
-    const roundedLines = allLines.features.map(line => roundLineCoordinates(line, newSharpness));
+    const roundedLines = allLines.features.map(line => roundLineCoordinates(line, newSharpness, resolution));
+    drawRef.current.set({ type: 'FeatureCollection', features: roundedLines });
+  };
+
+  const handleResolutionChange = (e) => {
+    const newResolution = parseFloat(e.target.value);
+    setResolution(newResolution);
+    if (drawRef.current.getMode() !== 'static') return;
+
+    const allLines = drawRef.current.getAll();
+    allLines.features.forEach(line => {
+      line.geometry.coordinates = line.properties.origCoords;
+      drawRef.current.add(line);
+    });
+    const roundedLines = allLines.features.map(line => roundLineCoordinates(line, sharpness, newResolution));
     drawRef.current.set({ type: 'FeatureCollection', features: roundedLines });
   };
 
   return (
     <>
+
       <div ref={mapContainerRef} style={{ width: '1000px', height: '90vh', margin: '20px auto' }} />
+     
       <div className="custom-controls">
+ <div className='sharpness-slider'>
+        
+        <label>Sharpness: {sharpness}</label>
+        <input
+          type="range"
+          min="0.01"
+          max="1"
+          step="0.01"
+          value={sharpness}
+          onChange={handleSharpnessChange}
+        />
+      </div>
+
         <CustomControl
           isChecked={isChecked}
           setIsChecked={setIsChecked}
           onClick={handleCustomControlClick}
         />
-        <div className='sharpness-slider'>
+     
+     
+        <div className='resolution-slider'>
         
-          <label>Sharpness: {sharpness}</label>
+          <label>Resolution: {resolution}</label>
           <input
             type="range"
-            min="0.01"
-            max="1"
-            step="0.01"
-            value={sharpness}
-            onChange={handleSharpnessChange}
+            min="0"
+            max="10000"
+            step="100"
+            value={resolution}
+            onChange={handleResolutionChange}
           />
         </div>
 
@@ -117,9 +149,10 @@ const Map = () => {
   )
 };
 
-const roundLineCoordinates = (line, sharpness) => {
+const roundLineCoordinates = (line, sharpness, resolution) => {
   const roundedLine = turf.lineString(line.geometry.coordinates);
-  const rounded = turf.bezier(roundedLine, { sharpness: sharpness });
+  const rounded = turf.bezier(roundedLine, { sharpness: sharpness, resolution: resolution });
+  console.log(sharpness, resolution)
   line.geometry.coordinates = rounded.geometry.coordinates;
   return line;
 };

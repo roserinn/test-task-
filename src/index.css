@@ -46,7 +46,7 @@ canvas {
 .mapboxgl-ctrl-group {
   display: flex;
   gap: 20px;
-  justify-content: center;
+  justify-content: space-evenly;
   padding: 3px 0;
 }
 
@@ -69,11 +69,32 @@ left: 43.7%;;
   left: 140px;
   top: 0px;
 }
-
 .sharpness-slider input {
   width:  300px;
 }
 
 .sharpness-slider label {
   width: 70px;
+}
+
+.resolution-slider {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  position: absolute;
+  left: -400px;
+  top: 0px;
+}
+
+.resolution-slider input {
+  width:  300px;
+}
+
+.resolution-slider label {
+  width: 70px;
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
 }
