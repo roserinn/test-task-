@@ -82,12 +82,12 @@ left: 43.7%;;
   gap: 10px;
   align-items: center;
   position: absolute;
-  left: -400px;
+  left: -600px;
   top: 0px;
 }
 
 .resolution-slider input {
-  width:  300px;
+  width:  500px;
 }
 
 .resolution-slider label {

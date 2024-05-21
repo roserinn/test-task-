@@ -137,8 +137,8 @@ const Map = () => {
           <input
             type="range"
             min="0"
-            max="10000"
-            step="100"
+            max="100000"
+            step="20"
             value={resolution}
             onChange={handleResolutionChange}
           />
