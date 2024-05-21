@@ -130,7 +130,7 @@ const Map = () => {
           onClick={handleCustomControlClick}
         />
      
-     
+{/*      
         <div className='resolution-slider'>
         
           <label>Resolution: {resolution}</label>
@@ -142,7 +142,7 @@ const Map = () => {
             value={resolution}
             onChange={handleResolutionChange}
           />
-        </div>
+        </div> */}
 
       </div>
     </>
